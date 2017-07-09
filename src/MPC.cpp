@@ -49,20 +49,20 @@ class FG_eval {
 
     // The part of the cost based on the reference state.
     for (t = 0; t < N; t++) {
-      fg[0] += CppAD::pow(vars[cte_start + t], 2);
-      fg[0] += 10 * CppAD::pow(vars[epsi_start + t], 2);
+      fg[0] += 10 * CppAD::pow(vars[cte_start + t], 2);
+      fg[0] += 100 * CppAD::pow(vars[epsi_start + t], 2);
       fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
     }
 
     // Minimize the use of actuators.
-    for (t = 0; t < N - 1; t++) {
-      fg[0] += 200 * CppAD::pow(vars[delta_start + t], 2);
+    for (t = 0; t < (N - 1); t++) {
+      fg[0] += 2000 * CppAD::pow(vars[delta_start + t], 2);
       fg[0] += CppAD::pow(vars[a_start + t], 2);
     }
 
     // Minimize the value gap between sequential actuations.
-    for (t = 0; t < N - 2; t++) {
-      fg[0] += 200 * CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
+    for (t = 0; t < (N - 2); t++) {
+      fg[0] += 1000 * CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
       fg[0] += CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
     }    
     // Initial constraints
@@ -175,12 +175,12 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   }
   // The upper and lower limits of delta are set to -25 and 25
   // degrees (values in radians).
-  for (i = delta_start; i < (delta_start + N -1); i++) {
+  for (i = delta_start; i < (delta_start + N - 1); i++) {
     vars_lowerbound[i] = -0.436332; // -25 / 180 * PI
     vars_upperbound[i] = 0.436332;  // 25 / 180 * PI
   }
   // Acceleration/decceleration upper and lower limits.
-  for (i = a_start; i < (a_start+N-1); i++) {
+  for (i = a_start; i < (a_start+ N - 1); i++) {
     vars_lowerbound[i] = -1.0;
     vars_upperbound[i] = 1.0;
   }
