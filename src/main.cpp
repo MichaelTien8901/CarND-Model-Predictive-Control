@@ -94,6 +94,21 @@ int main() {
           double psi = j[1]["psi"]; // radian
           double v = j[1]["speed"]; // mph
           double v_msec = v * 0.44704; // convert to m/sec
+          // get steering angle
+          double delta = j[1]["steering_angle"];
+          delta *= -0.4363323; // simulator steering angle in opposite direction
+
+          const double latency = 0.1; // 100ms latency of actuator
+          const double Lf = 2.67;
+          // x_[t+1] = x[t] + v[t] * cos(psi[t]) * dt
+          // y_[t+1] = y[t] + v[t] * sin(psi[t]) * dt
+          // psi_[t+1] = psi[t] + v[t] / Lf * delta[t] * dt
+          // v_[t+1] = v[t] + a[t] * dt          
+          px = px + v_msec * cos(psi) * latency;
+          py = py + v_msec * sin(psi) * latency;
+          psi = psi + v_msec*delta/Lf*latency;
+          double a = j[1]["throttle"];
+          v = v + a * latency;
 
           Eigen::VectorXd eptsx(ptsx.size()); // transformed waypoints
           Eigen::VectorXd eptsy(ptsy.size());
@@ -136,7 +151,7 @@ int main() {
           json msgJson;
           // NOTE: Remember to divide by deg2rad(25) before you send the steering value back.
           // Otherwise the values will be in between [-deg2rad(25), deg2rad(25] instead of [-1, 1].
-          msgJson["steering_angle"] = -steer_value; // simulator angle direction is opposite
+          msgJson["steering_angle"] = -steer_value; // simulator steering angle direction is opposite
           msgJson["throttle"] = throttle_value;
 
           //Display the MPC predicted trajectory 
