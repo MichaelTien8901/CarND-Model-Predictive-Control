@@ -6,8 +6,8 @@
 using CppAD::AD;
 
 // TODO: Set the timestep length and duration
-size_t N = 20;   // 1 second
-double dt = 0.15; // 200ms
+size_t N = 10;   // 3 second
+double dt = 0.15; // 150ms
 
 // This value assumes the model presented in the classroom is used.
 //
@@ -21,7 +21,7 @@ double dt = 0.15; // 200ms
 // This is the length from front to CoG that has a similar radius.
 const double Lf = 2.67;
 // reference speed
-const double ref_v = 40 * 0.44704; // convert mile/hour to m/sec
+const double ref_v = 60 * 0.44704; // 60 MPH convert mile/hour to m/sec
 
 const size_t x_start = 0;
 const size_t y_start = x_start + N;
@@ -49,8 +49,8 @@ class FG_eval {
 
     // The part of the cost based on the reference state.
     for (t = 0; t < N; t++) {
-      fg[0] += 10 * CppAD::pow(vars[cte_start + t], 2);
-      fg[0] += 100 * CppAD::pow(vars[epsi_start + t], 2);
+      fg[0] += CppAD::pow(vars[cte_start + t], 2);
+      fg[0] += CppAD::pow(vars[epsi_start + t], 2);
       fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
     }
 
@@ -62,7 +62,7 @@ class FG_eval {
 
     // Minimize the value gap between sequential actuations.
     for (t = 0; t < (N - 2); t++) {
-      fg[0] += 1000 * CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
+      fg[0] += 8000 * CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
       fg[0] += CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
     }    
     // Initial constraints
